@@ -57,6 +57,11 @@ EnableLCD:
     ld a, LCDCF_ON | LCDCF_BGON | LCDCF_OBJON
     ld [rLCDC], a
 
+GlobalInit:
+    ld a, 0
+    ld [wFrameCounter], a
+    ld [wCurKeys], a
+    ld [wNewKeys], a
 Main:
     ; If not VBlank Loop
     ld a, [rLY]
@@ -73,17 +78,34 @@ WaitVBlankMain:
     inc a
     ld [wFrameCounter], a
 
-    ; Check for 15th frame
-    cp 15
-    jp nz, Main
+    ; Check User Input
+    call UpdateKeys
+CheckLeft:
+    ld a, [wCurKeys]
+    and a, PADF_LEFT
+    jp z, CheckRight
+    jp MoveLeft
+CheckRight:
+    ld a, [wCurKeys]
+    and a, PADF_RIGHT
+    jp z, Main
+    jp MoveRight
+MoveLeft:
+    ld a, [_OAMRAM + 1]
+    dec a
 
-    ; Reset frame counter
-    ld a, 0
-    ld [wFrameCounter], a
-
-    ; Increment X
+    ; If touching left boundary, goto main
+    cp a, 15
+    jp z, Main
+    ld [_OAMRAM + 1], a
+    jp Main
+MoveRight:
     ld a, [_OAMRAM + 1]
     inc a
+
+    ; If touching right boundary, goto main
+    cp a, 105
+    jp z, Main
     ld [_OAMRAM + 1], a
     jp Main
 
