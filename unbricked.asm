@@ -20,41 +20,17 @@ LoadTiles:
     ld de, Tiles
     ld hl, _VRAM9000
     ld bc, TilesEnd - Tiles
-CopyTiles:
-    ; Copy all tiles recursively
-    ld a, [de]
-    ld [hli], a
-    inc de ; Progress
-    dec bc ; Decrese remaining
-    ld a, b
-    or a, c ; If bc not empty -> Repeat
-    jp nz, CopyTiles
+    call MemCopy
 LoadTilemap:
     ld de, Tilemap
     ld hl, _SCRN0
     ld bc, TilemapEnd - Tilemap
-CopyTilemap:
-    ; Copy the tilemap recursively
-    ld a, [de]
-    ld [hli], a
-    inc de
-    dec bc
-    ld a, b
-    or a, c
-    jp nz, CopyTilemap
+    call MemCopy
 LoadSprites:
     ld de, Sprites
     ld hl, _VRAM8000
     ld bc, SpritesEnd - Sprites
-CopySprites:
-    ; Copy the sprites recursively
-    ld a, [de]
-    ld [hli], a
-    inc de
-    dec bc
-    ld a, b
-    or a, c
-    jp nz, CopySprites
+    call MemCopy
 
 PrepClearOAM:
     ld a, 0
@@ -111,6 +87,7 @@ WaitVBlankMain:
     ld [_OAMRAM + 1], a
     jp Main
 
+INCLUDE "helpers.asm"
 INCLUDE "tiles/tiles.asm"
 INCLUDE "tiles/tilemap.asm"
 INCLUDE "tiles/sprites.asm"
